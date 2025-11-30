@@ -1,4 +1,5 @@
- 
+<p align="center">  <img src="resources/dashboardscetch2.png" alt="Dashboard Sketch" width="75%"> </p>
+
 There are two main approaches to building a Qt project for the Raspberry Pi, and the recommended method for most users is Native Compilation.
 
 1. 🖥️ Native Compilation (Recommended)
