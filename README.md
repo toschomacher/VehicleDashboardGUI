@@ -1,8 +1,10 @@
+<div align="center"> <h1>Vehicle Dashboard GUI with Embedded Cruise Control</h1> </div>
+
 <p align="center">  <img src="resources/Pidisp.png" alt="Dashboard Sketch"> </p>
 
-There are two main approaches to building a Qt project for the Raspberry Pi, and the recommended method for most users is Native Compilation.
+## There are two main approaches to building a Qt project for the Raspberry Pi, and the recommended method for most users is Native Compilation.
 
-1. 🖥️ Native Compilation (Recommended)
+### 1. 🖥️ Native Compilation (Recommended)
 This is the simpler method. The source code is copied to the Raspberry Pi and used with the Qt tools installed on the Pi itself to build the executable directly for its own architecture.
 
 A. Preparation on the Raspberry Pi
@@ -48,7 +50,7 @@ Run the application:
 Bash
 
 ./appSecondTestGUI
-2. 🚀 Deployment on Linux (The windeployqt equivalent)
+### 2. 🚀 Deployment on Linux (The windeployqt equivalent)
 Unlike Windows, Linux executables compiled against system libraries (like the ones installed via apt) often run fine on other machines with the same Linux distribution and libraries installed (e.g., Raspberry Pi OS on another Pi).
 
 If the application needs to be distributed to a Pi without the full Qt development environment, a deployment tool can be used or a package manager approach:
@@ -58,7 +60,7 @@ Install Required Libraries on the Target Pi: If the application is missing DLLs 
 Bash
 
 ldd ./appSecondTestGUI
-# Example: If it says libQt6Widgets.so.6 is missing, you would use:
+## Example: If it says libQt6Widgets.so.6 is missing, you would use:
 sudo apt install libqt6widgets6
 Use linuxdeployqt (Advanced): This tool, which is conceptually similar to windeployqt, creates a self-contained application bundle (like an AppImage) that includes all necessary libraries and plugins. This requires a more complex setup but results in a fully portable executable.
 
