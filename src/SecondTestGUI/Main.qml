@@ -19,7 +19,6 @@ Window {
         source: "background.png" // file must be in the same folder as Main.qml at runtime
         fillMode: Image.PreserveAspectCrop
     }
-
     Column {
         anchors.centerIn: parent
         spacing: 20

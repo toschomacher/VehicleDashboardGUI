@@ -19,6 +19,11 @@ qt_add_qml_module(appSecondTestGUI
         background.png   # <-- add the PNG here
     RESOURCES
         resources.qrc
+        SOURCES SpeedNeedleWidget.h
+        SOURCES SpeedNeedleWidget.h
+        SOURCES SpeedNeedleWidget.h
+        SOURCES SpeedNeedleWidget.h
+        SOURCES SpeedNeedleWidget.h
 )
 
 
