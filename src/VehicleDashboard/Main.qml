@@ -13,8 +13,9 @@ Window {
     onWidthChanged: height = width / aspectRatio
     onHeightChanged: width = height * aspectRatio
 
-    Rectangle {
+    Image {
         anchors.fill: parent
-        color: "black"
+        source: "images/background.png"
+        fillMode: Image.PreserveAspectCrop
     }
 }

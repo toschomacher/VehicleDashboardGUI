@@ -21,6 +21,8 @@ qt_add_qml_module(appVehicleDashboardGUI
     RESOURCE_PREFIX "/"
     QML_FILES
         Main.qml
+    RESOURCES
+        images/background.png
 )
 
 target_link_libraries(appVehicleDashboardGUI
