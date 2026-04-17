@@ -14,8 +14,18 @@ Window {
     onHeightChanged: width = height * aspectRatio
 
     Image {
-        anchors.fill: parent
-        source: "images/background.png"
-        fillMode: Image.PreserveAspectCrop
+    anchors.fill: parent
+    source: "images/background.png"
+    fillMode: Image.PreserveAspectCrop
+
+    Gauge {
+        id: gauge
+        x: 298
+        y: 36
+        width: 840
+        height: 840
+        speed: 0
+        rpm: 0
     }
+}
 }
