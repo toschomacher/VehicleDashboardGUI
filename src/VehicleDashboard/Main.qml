@@ -213,5 +213,52 @@ Window {
                 }
             }
         }
+
+        // Button 5 Cancel
+        Rectangle {
+            id: cancelButton
+            x: 1122
+            y: 862
+            width: 226
+            height: 180
+            color: "#33FFFFFF"
+            border.color: "white"
+            border.width: 2
+            radius: 5
+
+            SequentialAnimation {
+                id: flashAnimCancel
+                PropertyAnimation {
+                    target: cancelButton
+                    property: "color"
+                    to: "#80FFFFFF"
+                    duration: 50
+                }
+                PropertyAnimation {
+                    target: cancelButton
+                    property: "color"
+                    to: "#33FFFFFF"
+                    duration: 150
+                }
+            }
+
+            Text {
+                text: "CRUISE\nCANCEL"
+                anchors.centerIn: parent
+                color: "white"
+                font.pixelSize: 45
+                font.bold: true
+                horizontalAlignment: Text.AlignHCenter
+                lineHeight: 1.2
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    flashAnimCancel.start()
+                    CC.active = false
+                }
+            }
+        }
     }
 }
