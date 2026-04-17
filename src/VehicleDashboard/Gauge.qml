@@ -6,27 +6,27 @@ Item {
 
     property real speed: 0
     property real rpm: 0
+    property real displaySpeed: 0
+    property real displayRPM: 0
 
     width: 700
     height: 700
 
     property real startAngle: 135
     property real sweep: 270
-    property real maxSpeed: 100
+    property real velocity: 0
 
-    // This offset shifts the needle so it aligns with the ticks.
-    property real angleOffset: -45
-
-    function speedToAngle(v) {
-        return startAngle + (v / maxSpeed) * sweep + angleOffset
-    }
-
+    // =========================
+    // RINGS / SHAPE GEOMETRY
+    // =========================
     Item {
         id: rings
         anchors.fill: parent
         visible: false
 
+        // ============================================
         // OUTER RING
+        // ============================================
         property real outerRadius: root.width * 0.495
         property real outerCutY: root.height * 0.9487
         property real outerCx: root.width / 2
@@ -42,7 +42,9 @@ Item {
         property real outerStartAngle: 180 - outerCutAngleDeg
         property real outerSweepAngle: 360 - 2 * outerCutAngleDeg + 80
 
+        // ============================================
         // MIDDLE RING
+        // ============================================
         property real middleRadius: root.width * 0.32
         property real middleCutY: root.height * 0.79
         property real middleCx: root.width / 2
@@ -58,7 +60,9 @@ Item {
         property real middleStartAngle: 180 - middleCutAngleDeg
         property real middleSweepAngle: 360 - 2 * middleCutAngleDeg + 80
 
+        // ============================================
         // INNER RING
+        // ============================================
         property real innerRadius: root.width * 0.23
         property real innerCutY: root.height * 0.7085
         property real innerCx: root.width / 2
@@ -75,10 +79,17 @@ Item {
         property real innerSweepAngle: 360 - 2 * innerCutAngleDeg + 80
     }
 
-    // BACKGROUND
+    // =========================
+    // BACKGROUND (MASKED TO OUTER SHAPE)
+    // =========================
     Item {
+        width: parent.width
+        height: parent.height
         anchors.fill: parent
 
+        // ---------------------------
+        // BASE SHAPE (matches outer ring)
+        // ---------------------------
         Shape {
             anchors.fill: parent
             antialiasing: true
@@ -90,12 +101,16 @@ Item {
                     centerX: rings.outerCx
                     centerY: rings.outerCy
 
+                    focalX: centerX
+                    focalY: centerY
+
                     GradientStop { position: 0.0; color: "#1a1a1d" }
                     GradientStop { position: 0.3; color: "#131417" }
                     GradientStop { position: 0.7; color: "#0b0b0d" }
                     GradientStop { position: 1.0; color: "#000000" }
                 }
 
+                // SAME PATH AS OUTER RING
                 startX: rings.outerLeftX
                 startY: rings.outerCutY
 
@@ -115,6 +130,9 @@ Item {
             }
         }
 
+        // ---------------------------
+        // SUBTLE TEXTURE
+        // ---------------------------
         Canvas {
             anchors.fill: parent
             opacity: 0.06
@@ -122,29 +140,40 @@ Item {
             onPaint: {
                 var ctx = getContext("2d")
                 ctx.reset()
-                for (var y = 0; y < height; y += 10) {
-                    for (var x = 0; x < width; x += 10) {
-                        ctx.fillStyle = ((x + y) % 20 === 0) ? "#111111" : "#0a0a0a"
-                        ctx.fillRect(x, y, 10, 10)
+
+                var size = 10
+
+                for (var y = 0; y < height; y += size) {
+                    for (var x = 0; x < width; x += size) {
+                        var dark = ((x + y) % (size * 2)) === 0
+                        ctx.fillStyle = dark ? "#111111" : "#0a0a0a"
+                        ctx.fillRect(x, y, size, size)
                     }
                 }
             }
         }
 
+        // ---------------------------
+        // CENTER DEPTH
+        // ---------------------------
         Rectangle {
             width: parent.width * 0.65
             height: width
             radius: width / 2
+
             anchors.centerIn: parent
             anchors.verticalCenterOffset: root.height * 0.04
+
             color: "#ffffff"
             opacity: 0.03
         }
 
+        // ---------------------------
+        // EDGE DARKEN (vignette)
+        // ---------------------------
         Shape {
             anchors.fill: parent
             opacity: 0.18
-            antialiasing: true
 
             ShapePath {
                 strokeWidth: 0
@@ -170,11 +199,13 @@ Item {
         }
     }
 
+    // =========================
     // RINGS
+    // =========================
     Item {
         anchors.fill: parent
 
-        // OUTER RING
+        // -------- OUTER RING --------
         Shape {
             anchors.fill: parent
             antialiasing: true
@@ -203,7 +234,7 @@ Item {
             }
         }
 
-        // MIDDLE RING
+        // -------- MIDDLE RING --------
         Shape {
             anchors.fill: parent
             opacity: 0.8
@@ -233,7 +264,7 @@ Item {
             }
         }
 
-        // INNER RING
+        // -------- INNER RING --------
         Shape {
             anchors.fill: parent
             opacity: 0.8
@@ -264,7 +295,48 @@ Item {
         }
     }
 
+    // =========================
+    // RPM ARC (LED STYLE)
+    // =========================
+    Repeater {
+        model: 80
+
+        delegate: Rectangle {
+            width: root.width * 0.02
+            height: root.width * 0.008
+            radius: height/2
+
+            property int i: index
+            property real t: i / 80
+            property real angle: root.startAngle + t * root.sweep
+
+            x: root.width/2 + Math.cos(angle * Math.PI/180) * root.width * 0.30 - width/2
+            y: root.height/2 + Math.sin(angle * Math.PI/180) * root.height * 0.30 - height/2
+
+            rotation: angle
+
+            property bool major: ((i+1) % 10 === 0 && i <= 49)
+            property int active: Math.floor(root.displayRPM / 100)
+
+            color: {
+                if (i < active) {
+                    if (major) return "#ff9c00"
+                    if (i > 65) return "#ff5050"
+                    if (i > 55) return "#ffcd00"
+                    return "#00d2ff"
+                } else {
+                    if (major) return "#00391c"
+                    return "#2a2a2e"
+                }
+            }
+
+            opacity: (i < active || major) ? 1.0 : 0.7
+        }
+    }
+
+    // =========================
     // SPEED TICKS
+    // =========================
     Repeater {
         model: 51
 
@@ -274,18 +346,21 @@ Item {
             property real angle: root.startAngle + (value / 100) * root.sweep
 
             width: major ? root.width * 0.006 : root.width * 0.0015
-            height: major ? root.width * 0.03 : root.width * 0.025
-            radius: width / 2
-            color: "#55000000"
+            height: major ? root.width * 0.03  : root.width * 0.025
 
-            x: root.width / 2 + Math.cos(angle * Math.PI / 180) * root.width * 0.48 - width / 2
-            y: root.height / 2 + Math.sin(angle * Math.PI / 180) * root.height * 0.48 - height / 2
+            color: "white"
+            radius: width / 2
+
+            x: root.width/2 + Math.cos(angle * Math.PI/180) * root.width * 0.48 - width/2
+            y: root.height/2 + Math.sin(angle * Math.PI/180) * root.height * 0.48 - height/2
 
             rotation: angle + 90
         }
     }
 
+    // =========================
     // SPEED NUMBERS
+    // =========================
     Repeater {
         model: 11
 
@@ -295,114 +370,170 @@ Item {
             font.pixelSize: Math.round(root.width * 0.075)
             font.bold: true
 
-            property real angle: root.startAngle + (index / 10) * root.sweep
+            property real angle: root.startAngle + (index/10) * root.sweep
 
-            x: root.width / 2 + Math.cos(angle * Math.PI / 180) * root.width * 0.39 - width / 2
-            y: root.height / 2 + Math.sin(angle * Math.PI / 180) * root.height * 0.39 - height / 2
+            x: root.width/2 + Math.cos(angle * Math.PI/180) * root.width * 0.39 - width/2
+            y: root.height/2 + Math.sin(angle * Math.PI/180) * root.height * 0.39 - height/2
         }
     }
 
-    // RPM LABELS
+    // =========================
+    // RPM NUMBERS
+    // =========================
     Repeater {
-        model: 7
+        model: 9
 
         delegate: Text {
             text: index
-            color: "#aaaaaa"
-            font.pixelSize: Math.round(root.width * 0.045)
+            color: "#00d2ff"
+            font.pixelSize: root.width * 0.05
+            font.bold: true
 
-            property real angle: root.startAngle + (index / 6) * root.sweep
+            property real angle: root.startAngle + (index / 8) * root.sweep
 
-            x: root.width / 2 + Math.cos(angle * Math.PI / 180) * root.width * 0.26 - width / 2
-            y: root.height / 2 + Math.sin(angle * Math.PI / 180) * root.height * 0.26 - height / 2
+            x: root.width/2 + Math.cos(angle * Math.PI/180) * root.width * 0.26 - width/2
+            y: root.height/2 + Math.sin(angle * Math.PI/180) * root.width * 0.26 - height/2
         }
     }
 
-    // --- NEEDLE (FIXED POSITIONING) ---
-    // Instead of anchoring to root center, we now align to the actual gauge center
-    Rectangle {
+    // =========================
+    // NEEDLE
+    // =========================
+    Item {
         id: needle
+        anchors.centerIn: parent
 
-        width: root.width * 0.012
-        height: root.width * 0.42
-        radius: width / 2
-        color: "#ff3b3b"
+        property real angle: root.startAngle + (root.displaySpeed / 100) * root.sweep
 
-        // using real gauge center (important for cut gauges)
-        x: rings.outerCx - width / 2
-        y: rings.outerCy - height
+        rotation: angle
 
-        transform: Rotation {
-            origin.x: width / 2
-            origin.y: height
-            angle: root.speedToAngle(root.speed)
-        }
-    }
+        property real length: root.width * 0.17
+        property real baseWidth: root.width * 0.016
+        property real tipWidth: root.width * 0.0045
+        property real offset: root.width * 0.3212
 
-    // NEEDLE HIGHLIGHT
-    Rectangle {
-        width: root.width * 0.004
-        height: root.width * 0.38
-        radius: width / 2
-        color: "#80ffffff"
+        Shape {
+            anchors.fill: parent
+            z: -3
+            opacity: 0.15
+            antialiasing: true
 
-        x: rings.outerCx - width / 2
-        y: rings.outerCy - height
+            ShapePath {
+                strokeWidth: 0
+                fillColor: "#ffffff"
 
-        transform: Rotation {
-            origin.x: width / 2
-            origin.y: height
-            angle: root.speedToAngle(root.speed)
-        }
-    }
+                startX: needle.offset
+                startY: -needle.baseWidth
 
-    // RPM LED ARC
-    // This creates the glowing segmented arc around the outer ring.
-    // Each segment lights up depending on the current RPM value.
-    // We use opacity instead of visible so inactive segments are still faintly visible.
-    // That makes the graph easier to debug and gives a better dashboard look.
-    Repeater {
-        model: 60   // number of LED segments
-
-        delegate: Rectangle {
-            width: root.width * 0.01
-            height: root.width * 0.035
-            radius: width / 2
-
-            // Convert index to normalized position (0 → 1)
-            property real t: index / (model - 1)
-
-            // Map RPM (0–6000 assumed) into same normalized range
-            property real rpmNorm: Math.min(root.rpm / 6000.0, 1.0)
-
-            // Instead of hiding inactive segments completely, make them dim
-            opacity: t <= rpmNorm ? 1.0 : 0.15
-
-            // Color zones for the RPM bar graph
-            color: {
-                if (t < 0.7) return "#00e0ff"   // blue / teal normal range
-                if (t < 0.9) return "#ffb000"   // orange warning range
-                return "#ff3030"                // red high RPM range
+                PathLine { x: needle.offset; y: needle.baseWidth }
+                PathLine { x: needle.offset + needle.length; y: needle.tipWidth }
+                PathLine { x: needle.offset + needle.length; y: -needle.tipWidth }
+                PathLine { x: needle.offset; y: -needle.baseWidth }
             }
-
-            // Position along the same arc as the outer scale
-            property real angle: root.startAngle + t * root.sweep
-
-            x: root.width / 2 + Math.cos(angle * Math.PI / 180) * root.width * 0.50 - width / 2
-            y: root.height / 2 + Math.sin(angle * Math.PI / 180) * root.height * 0.50 - height / 2
-
-            rotation: angle + 90
         }
-    }
 
-    // Temporary animation timer for testing the RPM LED arc
-    Timer {
-        interval: 30
-        running: true
-        repeat: true
+        Shape {
+            anchors.fill: parent
+            opacity: 0.50
+            z: -1
+            antialiasing: true
 
-        onTriggered: {
-            root.rpm = (root.rpm + 100) % 6000
+            ShapePath {
+                strokeWidth: 0
+                fillColor: "black"
+
+                startX: needle.offset + 2
+                startY: -needle.baseWidth / 2 + 2
+
+                PathLine { x: needle.offset + 2; y: needle.baseWidth / 2 + 2 }
+                PathLine { x: needle.offset + needle.length + 2; y: needle.tipWidth / 2 + 2 }
+                PathLine { x: needle.offset + needle.length + 2; y: -needle.tipWidth / 2 + 2 }
+                PathLine { x: needle.offset + 2; y: -needle.baseWidth / 2 + 2 }
+            }
+        }
+
+        // Main needle colour and shape
+        Shape {
+            anchors.fill: parent
+            antialiasing: true
+
+            ShapePath {
+                strokeWidth: 0
+
+                fillGradient: LinearGradient {
+                    x1: needle.offset
+                    y1: 0
+                    x2: needle.offset + needle.length
+                    y2: 0
+
+                    GradientStop { position: 0.00; color: "#878787" }
+                    GradientStop { position: 0.10; color: "#ffffff" }
+                    GradientStop { position: 0.84; color: "#ffffff" }
+                    GradientStop { position: 0.85; color: "#ff2d00" }
+                    GradientStop { position: 1.00; color: "#ff2d00" }
+                }
+
+                startX: needle.offset
+                startY: -needle.baseWidth / 2
+
+                PathLine { x: needle.offset; y: needle.baseWidth / 2 }
+                PathLine { x: needle.offset + needle.length; y: needle.tipWidth / 2 }
+                PathLine { x: needle.offset + needle.length; y: -needle.tipWidth / 2 }
+                PathLine { x: needle.offset; y: -needle.baseWidth / 2 }
+            }
+        }
+
+        Shape {
+            anchors.fill: parent
+            opacity: 0.25
+            antialiasing: true
+
+            ShapePath {
+                strokeWidth: 0
+                fillColor: "#ffffff"
+
+                startX: needle.offset + needle.length * 0.10
+                startY: -needle.baseWidth * 0.25
+
+                PathLine {
+                    x: needle.offset + needle.length * 0.10
+                    y: 0
+                }
+
+                PathLine {
+                    x: needle.offset + needle.length * 0.92
+                    y: needle.tipWidth * 0.10
+                }
+
+                PathLine {
+                    x: needle.offset + needle.length * 0.92
+                    y: -needle.tipWidth * 0.15
+                }
+
+                PathLine {
+                    x: needle.offset + needle.length * 0.10
+                    y: -needle.baseWidth * 0.25
+                }
+            }
+        }
+
+        Shape {
+            anchors.fill: parent
+            opacity: 0.20
+            antialiasing: true
+
+            ShapePath {
+                strokeWidth: 0
+                fillColor: "black"
+
+                startX: needle.offset
+                startY: 0
+
+                PathLine { x: needle.offset; y: needle.baseWidth / 2 }
+                PathLine { x: needle.offset + needle.length; y: needle.tipWidth / 2 }
+                PathLine { x: needle.offset + needle.length; y: needle.tipWidth * 0.20 }
+                PathLine { x: needle.offset; y: 0 }
+            }
         }
     }
 }
