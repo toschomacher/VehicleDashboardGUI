@@ -925,4 +925,60 @@ Item {
             }
         }
     }
+
+    // =========================
+    // Cruise control indicator
+    // =========================
+    Item {
+        id: ccBar
+        width: 250
+        height: 400
+
+        // ADJUST POSITION: If -250 is off-screen, try moving it inside the view
+        // x: 50
+        x: -250
+        y: 0
+
+        Column {
+            anchors.top: parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
+            spacing: 10
+
+            Row {
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: 5
+
+                Text {
+                    id: valTxt
+                    // Changed to root.ccSetValue to listen to the Gauge's property
+                    text: Math.round(root.ccSetValue)
+
+                    // Color updates based on root activation state
+                    color: root.ccActivated ? "#00ce25" : "#404040"
+                    font.pixelSize: 130
+                    font.bold: true
+                }
+
+                Text {
+                    text: "MPH"
+                    color: root.ccActivated ? "#00ce25" : "#404040"
+                    font.pixelSize: 40
+                    anchors.bottom: valTxt.bottom
+                    anchors.bottomMargin: 12
+                }
+            }
+
+            Image {
+                id: ccIcon
+                width: 200
+                height: 200
+
+                // Updated to root.ccActivated
+                source: root.ccActivated ? "images/ccon.png" : "images/ccoff.png"
+                fillMode: Image.PreserveAspectFit
+
+                onStatusChanged: if (status === Image.Error) console.log("Missing: " + source)
+            }
+        }
+    }
 }
