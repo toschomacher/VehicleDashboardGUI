@@ -7,12 +7,15 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 6.4 REQUIRED COMPONENTS Quick)
+find_package(Qt6 REQUIRED COMPONENTS Quick SerialBus)
+find_library(GPIOD_LIB gpiod)
 
 qt_standard_project_setup(REQUIRES 6.4)
 
 qt_add_executable(appVehicleDashboardGUI
     main.cpp
+    CanBusManager.h
+    CanBusManager.cpp
 )
 
 qt_add_qml_module(appVehicleDashboardGUI
@@ -23,7 +26,7 @@ qt_add_qml_module(appVehicleDashboardGUI
         Main.qml
         Gauge.qml
     RESOURCES
-        images/background.png
+        resources.qrc
         images/background.png
         images/ccon.png
         images/ccoff.png
@@ -31,10 +34,18 @@ qt_add_qml_module(appVehicleDashboardGUI
         images/temporange.png
         images/tempred.png
         images/afr.png
+        sounds/ready.wav
+)
+
+set_target_properties(appVehicleDashboardGUI PROPERTIES
+    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+    MACOSX_BUNDLE TRUE
+    WIN32_EXECUTABLE TRUE
 )
 
 target_link_libraries(appVehicleDashboardGUI
-    PRIVATE Qt6::Quick
+    PRIVATE Qt6::Quick Qt6::SerialBus ${GPIOD_LIB}
 )
 
 include(GNUInstallDirs)
