@@ -181,4 +181,36 @@ void taskCAN(void *pv) {
   }
 }
 
+// ----------------------
+// SETUP
+// ----------------------
+void setup() {
+
+  Serial.begin(115200);
+
+  Serial.println("Running...");
+
+  pinMode(BTN_BRAKE, INPUT_PULLUP);
+  pinMode(BTN_CLUTCH, INPUT_PULLUP);
+  pinMode(BTN_COOLANT_UP, INPUT_PULLUP);
+  pinMode(BTN_COOLANT_DOWN, INPUT_PULLUP);
+
+  // CAN
+  twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT(
+    GPIO_NUM_5,
+    GPIO_NUM_4,
+    TWAI_MODE_NORMAL
+  );
+
+  twai_timing_config_t t_config = TWAI_TIMING_CONFIG_500KBITS();
+  twai_filter_config_t f_config = TWAI_FILTER_CONFIG_ACCEPT_ALL();
+
+  twai_driver_install(&g_config, &t_config, &f_config);
+  twai_start();
+
+  // tasks
+  xTaskCreatePinnedToCore(taskButtons, "Buttons", 2048, NULL, 1, NULL, 0);
+  xTaskCreatePinnedToCore(taskCAN, "CAN", 4096, NULL, 1, NULL, 1);
+}
+
 void loop() {}
