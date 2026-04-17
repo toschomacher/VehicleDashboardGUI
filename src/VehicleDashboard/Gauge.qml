@@ -12,6 +12,11 @@ Item {
 
     property real startAngle: 135
     property real sweep: 270
+    property real maxSpeed: 100
+
+    function speedToAngle(v) {
+        return startAngle + (v / maxSpeed) * sweep
+    }
 
     Item {
         id: rings
@@ -110,23 +115,23 @@ Item {
         }
 
         Canvas {
-            anchors.fill: parent
-            opacity: 0.06
+                    anchors.fill: parent
+                    opacity: 0.06
 
-            onPaint: {
-                var ctx = getContext("2d")
-                ctx.reset()
+                    onPaint: {
+                        var ctx = getContext("2d")
+                        ctx.reset()
 
-                var size = 10
-                for (var y = 0; y < height; y += size) {
-                    for (var x = 0; x < width; x += size) {
-                        var dark = ((x + y) % (size * 2)) === 0
-                        ctx.fillStyle = dark ? "#111111" : "#0a0a0a"
-                        ctx.fillRect(x, y, size, size)
+                        var size = 10
+                        for (var y = 0; y < height; y += size) {
+                            for (var x = 0; x < width; x += size) {
+                                var dark = ((x + y) % (size * 2)) === 0
+                                ctx.fillStyle = dark ? "#111111" : "#0a0a0a"
+                                ctx.fillRect(x, y, size, size)
+                            }
+                        }
                     }
                 }
-            }
-        }
 
         Rectangle {
             width: parent.width * 0.65
@@ -315,4 +320,22 @@ Item {
         }
     }
 
+    // NEEDLE
+    Rectangle {
+        id: needle
+
+        width: root.width * 0.012
+        height: root.width * 0.42
+        radius: width / 2
+        color: "#ff3b3b"
+
+        x: root.width / 2 - width / 2
+        y: root.height / 2 - height
+
+        transform: Rotation {
+            origin.x: width / 2
+            origin.y: height
+            angle: root.speedToAngle(root.speed)
+        }
+    }
 }
