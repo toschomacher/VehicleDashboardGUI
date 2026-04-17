@@ -5,9 +5,15 @@
 #include "CanBusManager.h"
 #include "SwitchHandler.h"
 #include "HardwareController.h"
+#include "CruiseController.h"
 #include <QDebug>
 #include <QCoreApplication>
 #include <QProcess>
+
+void playReadySound()
+{
+    QProcess::startDetached("aplay", {"sounds/ready.wav"});
+}
 
 int main(int argc, char *argv[])
 {
@@ -18,6 +24,7 @@ int main(int argc, char *argv[])
     CanBusManager canManager;
     SwitchHandler swHandler;
     HardwareController hw;
+    CruiseController cc;
 
 #ifdef Q_OS_LINUX
     canManager.start();
@@ -37,6 +44,35 @@ int main(int argc, char *argv[])
     // Expose backend to QML
     // -------------------------------
     engine.rootContext()->setContextProperty("CAN", &canManager);
+    engine.rootContext()->setContextProperty("CC", &cc);
+
+    // -------------------------------
+    // Cruise Control Input Sync
+    // -------------------------------
+    auto updateCC = [&cc, &canManager]() {
+        cc.updateInputs(
+            canManager.speed(),
+            canManager.rpm(),          // <-- ADD THIS
+            canManager.throttle(),
+            canManager.brake(),
+            canManager.clutch()
+            );
+    };
+
+    QObject::connect(&canManager, &CanBusManager::speedChanged, updateCC);
+    QObject::connect(&canManager, &CanBusManager::throttleChanged, updateCC);
+    QObject::connect(&canManager, &CanBusManager::brakeChanged, updateCC);
+    QObject::connect(&canManager, &CanBusManager::clutchChanged, updateCC);
+    QString soundPath = QCoreApplication::applicationDirPath() + "/../sounds/ready.wav";
+
+    QObject::connect(&cc, &CruiseController::readyTriggered, [soundPath]() {
+        QTimer::singleShot(1300, [soundPath]() {    // 1300 ms delay for the READY sound to play
+            QProcess::startDetached("aplay", {soundPath});
+        });
+    });
+
+    // Initial sync (important!)
+    updateCC();
 
     // -------------------------------
     // ?? Hardware integration (CRITICAL)
@@ -50,6 +86,7 @@ int main(int argc, char *argv[])
         hw.update(cc.isActive(), cc.outputThrottle());
     });
 #endif
+
     // -------------------------------
     // Load QML
     // -------------------------------
