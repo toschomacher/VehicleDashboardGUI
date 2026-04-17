@@ -260,6 +260,43 @@ Item {
             }
         }
     }
-    // TODO: Speed numbers and ticks next
+
+    // SPEED TICKS
+    Repeater {
+        model: 51
+
+        delegate: Rectangle {
+            property real value: index * 2
+            property bool major: (value % 10 === 0)
+            property real angle: root.startAngle + (value / 100) * root.sweep
+
+            width: major ? root.width * 0.006 : root.width * 0.0015
+            height: major ? root.width * 0.03 : root.width * 0.025
+            radius: width / 2
+            color: "white"
+
+            x: root.width / 2 + Math.cos(angle * Math.PI / 180) * root.width * 0.48 - width / 2
+            y: root.height / 2 + Math.sin(angle * Math.PI / 180) * root.height * 0.48 - height / 2
+
+            rotation: angle + 90
+        }
+    }
+
+    // SPEED NUMBERS
+    Repeater {
+        model: 11
+
+        delegate: Text {
+            text: index * 10
+            color: "white"
+            font.pixelSize: Math.round(root.width * 0.075)
+            font.bold: true
+
+            property real angle: root.startAngle + (index / 10) * root.sweep
+
+            x: root.width / 2 + Math.cos(angle * Math.PI / 180) * root.width * 0.39 - width / 2
+            y: root.height / 2 + Math.sin(angle * Math.PI / 180) * root.height * 0.39 - height / 2
+        }
+    }
 
 }
