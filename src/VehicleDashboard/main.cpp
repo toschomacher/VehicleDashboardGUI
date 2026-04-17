@@ -4,6 +4,7 @@
 #include <QProcess>
 #include "CanBusManager.h"
 #include "SwitchHandler.h"
+#include "HardwareController.h"
 #include <QDebug>
 #include <QCoreApplication>
 #include <QProcess>
@@ -16,6 +17,7 @@ int main(int argc, char *argv[])
 
     CanBusManager canManager;
     SwitchHandler swHandler;
+    HardwareController hw;
 
 #ifdef Q_OS_LINUX
     canManager.start();
@@ -37,6 +39,18 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("CAN", &canManager);
 
     // -------------------------------
+    // ?? Hardware integration (CRITICAL)
+    // -------------------------------
+#ifdef Q_OS_LINUX
+    QObject::connect(&cc, &CruiseController::outputThrottleChanged, [&]() {
+        hw.update(cc.isActive(), cc.outputThrottle());
+    });
+
+    QObject::connect(&cc, &CruiseController::activeChanged, [&]() {
+        hw.update(cc.isActive(), cc.outputThrottle());
+    });
+#endif
+    // -------------------------------
     // Load QML
     // -------------------------------
     QObject::connect(
@@ -50,6 +64,14 @@ int main(int argc, char *argv[])
     engine.loadFromModule("VehicleDashboardGUI", "Main");
 #else
     engine.load(QUrl(QStringLiteral("qrc:/VehicleDashboardGUI/Main.qml")));
+#endif
+
+    // -------------------------------
+    // Start hardware
+    // -------------------------------
+#ifdef Q_OS_LINUX
+    hw.start();
+    hw.update(false, 0);
 #endif
 
     return app.exec();
