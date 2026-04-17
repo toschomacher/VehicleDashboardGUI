@@ -68,3 +68,43 @@ void CruiseController::updateInputs(float speed, float rpm, float throttle, bool
 
     wasReady = isReady;
 }
+
+void CruiseController::controlLoop()
+{
+    if (!m_active)
+        return;
+
+    // Safety cancel
+    if (m_brake || m_clutch) {
+        setActive(false);
+        return;
+    }
+
+    float error = m_setSpeed - m_currentSpeed;
+
+    // --- PID (PI) ---
+    float Kp = 0.8f;
+    float Ki = 0.1f;
+
+    m_integral += error * 0.05f;
+
+    float output = Kp * error + Ki * m_integral;
+
+    m_outputThrottle += output;
+
+    m_outputThrottle = qBound(0.0f, m_outputThrottle, 100.0f);
+
+    emit outputThrottleChanged();
+}
+
+void CruiseController::resume()
+{
+    if (m_lastSetSpeed <= 0)
+        return;
+
+    m_setSpeed = m_lastSetSpeed;
+    m_resumeRequested = true;
+
+    emit setSpeedChanged();
+    setActive(true);
+}
