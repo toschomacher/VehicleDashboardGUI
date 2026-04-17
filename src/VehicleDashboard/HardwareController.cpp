@@ -1,0 +1,92 @@
+#include "HardwareController.h"
+
+#include <QDebug>
+#include <QDateTime>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <linux/i2c-dev.h>
+#include <gpiod.h>
+
+// I2C addresses
+#define ADS1115_ADDR 0x48
+#define MCP4728_ADDR 0x60
+
+static gpiod_chip *chip = nullptr;
+static gpiod_line *line17 = nullptr;
+static gpiod_line *line21 = nullptr;
+
+HardwareController::HardwareController(QObject *parent)
+    : QObject(parent)
+{
+}
+
+HardwareController::~HardwareController()
+{
+    if (timer) timer->stop();
+
+    if (i2c_fd >= 0) close(i2c_fd);
+
+    if (line17) gpiod_line_release(line17);
+    if (line21) gpiod_line_release(line21);
+    if (chip)   gpiod_chip_close(chip);
+}
+
+// ==========================
+// START
+// ==========================
+void HardwareController::start()
+{
+    i2c_fd = open("/dev/i2c-1", O_RDWR);
+    if (i2c_fd < 0) {
+        qDebug() << "Failed to open I2C bus";
+        return;
+    }
+
+    setupGPIO();
+
+    // Start periodic loop
+    timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, &HardwareController::loop);
+    timer->start(50); // 20 Hz
+}
+
+// ==========================
+// MAIN LOOP
+// ==========================
+void HardwareController::loop()
+{
+    // ---- ADC monitoring (slow print) ----
+    static qint64 lastPrint = 0;
+
+    float ch0 = readADC(0);
+    float ch1 = readADC(1);
+
+    qint64 now = QDateTime::currentMSecsSinceEpoch();
+    if (now - lastPrint > 3000) {
+        qDebug() << "ADC CH0:" << ch0 << "V | CH1:" << ch1 << "V";
+        lastPrint = now;
+    }
+}
+
+// ==========================
+// EXTERNAL UPDATE (FROM CC)
+// ==========================
+void HardwareController::update(bool ccActive, float throttle)
+{
+    // Clamp throttle
+    if (throttle < 0) throttle = 0;
+    if (throttle > 100) throttle = 100;
+
+    // ---- SWITCH CONTROL ----
+    setSwitches(ccActive);
+
+    // ---- DAC CONTROL ----
+    if (ccActive) {
+        float v1 = getVPA(throttle);
+        float v2 = getVPA2(throttle);
+
+        setDACVoltage(0, v1);
+        setDACVoltage(1, v2);
+    }
+}

@@ -17,6 +17,8 @@ qt_add_executable(appVehicleDashboardGUI
     SwitchHandler.h
     CanBusManager.h
     CanBusManager.cpp
+    HardwareController.h
+    HardwareController.cpp
 )
 
 qt_add_qml_module(appVehicleDashboardGUI
