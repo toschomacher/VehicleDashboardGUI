@@ -1,0 +1,10 @@
+build*/
+cmake-build*/
+.qmltc/
+.qt/
+.qtcreator/
+*.user
+*.pro.user
+CMakeCache.txt
+CMakeFiles/
+Makefile
