@@ -86,8 +86,6 @@ Item {
                 fillGradient: RadialGradient {
                     centerX: rings.outerCx
                     centerY: rings.outerCy
-                    focalX: centerX
-                    focalY: centerY
 
                     GradientStop { position: 0.0; color: "#1a1a1d" }
                     GradientStop { position: 0.3; color: "#131417" }
@@ -115,23 +113,20 @@ Item {
         }
 
         Canvas {
-                    anchors.fill: parent
-                    opacity: 0.06
+            anchors.fill: parent
+            opacity: 0.06
 
-                    onPaint: {
-                        var ctx = getContext("2d")
-                        ctx.reset()
-
-                        var size = 10
-                        for (var y = 0; y < height; y += size) {
-                            for (var x = 0; x < width; x += size) {
-                                var dark = ((x + y) % (size * 2)) === 0
-                                ctx.fillStyle = dark ? "#111111" : "#0a0a0a"
-                                ctx.fillRect(x, y, size, size)
-                            }
-                        }
+            onPaint: {
+                var ctx = getContext("2d")
+                ctx.reset()
+                for (var y = 0; y < height; y += 10) {
+                    for (var x = 0; x < width; x += 10) {
+                        ctx.fillStyle = ((x + y) % 20 === 0) ? "#111111" : "#0a0a0a"
+                        ctx.fillRect(x, y, 10, 10)
                     }
                 }
+            }
+        }
 
         Rectangle {
             width: parent.width * 0.65
@@ -277,8 +272,8 @@ Item {
 
             width: major ? root.width * 0.006 : root.width * 0.0015
             height: major ? root.width * 0.03 : root.width * 0.025
-            radius: width / 2
-            color: "white"
+        radius: width / 2
+        color: "#55000000"
 
             x: root.width / 2 + Math.cos(angle * Math.PI / 180) * root.width * 0.48 - width / 2
             y: root.height / 2 + Math.sin(angle * Math.PI / 180) * root.height * 0.48 - height / 2
@@ -328,6 +323,23 @@ Item {
         height: root.width * 0.42
         radius: width / 2
         color: "#ff3b3b"
+
+        x: root.width / 2 - width / 2
+        y: root.height / 2 - height
+
+        transform: Rotation {
+            origin.x: width / 2
+            origin.y: height
+            angle: root.speedToAngle(root.speed)
+        }
+    }
+
+    // NEEDLE HIGHLIGHT
+    Rectangle {
+        width: root.width * 0.004
+        height: root.width * 0.38
+        radius: width / 2
+        color: "#80ffffff"
 
         x: root.width / 2 - width / 2
         y: root.height / 2 - height
