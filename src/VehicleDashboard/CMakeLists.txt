@@ -14,6 +14,7 @@ qt_standard_project_setup(REQUIRES 6.4)
 
 qt_add_executable(appVehicleDashboardGUI
     main.cpp
+    SwitchHandler.h
     CanBusManager.h
     CanBusManager.cpp
 )
