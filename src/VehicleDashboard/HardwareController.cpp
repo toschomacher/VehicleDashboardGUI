@@ -176,3 +176,16 @@ void HardwareController::setSwitches(bool enabled)
     gpiod_line_set_value(line17, enabled ? 1 : 0);
     gpiod_line_set_value(line21, enabled ? 1 : 0);
 }
+
+// ==========================
+// THROTTLE MAPS
+// ==========================
+float HardwareController::getVPA(float throttle)
+{
+    return 0.8f + (throttle * (3.6f - 0.8f) / 100.0f);
+}
+
+float HardwareController::getVPA2(float throttle)
+{
+    return 1.6f + (throttle * (4.6f - 1.6f) / 100.0f);
+}
