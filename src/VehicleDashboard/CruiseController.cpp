@@ -37,3 +37,34 @@ void CruiseController::setActive(bool active)
 
     emit activeChanged();
 }
+
+void CruiseController::setSetSpeed(float speed)
+{
+    if (!m_active)
+        return;
+
+    m_setSpeed = speed;
+    m_lastSetSpeed = speed;
+
+    emit setSpeedChanged();
+    emit lastSetSpeedChanged();
+}
+
+void CruiseController::updateInputs(float speed, float rpm, float throttle, bool brake, bool clutch)
+{
+    m_currentSpeed = speed;
+    m_currentRPM = rpm;   // <-- ADD THIS
+    m_currentThrottle = throttle;
+    m_brake = brake;
+    m_clutch = clutch;
+
+    static bool wasReady = false;
+
+    bool isReady = (m_currentRPM < 50);
+
+    if (isReady && !wasReady) {
+        emit readyTriggered();
+    }
+
+    wasReady = isReady;
+}
