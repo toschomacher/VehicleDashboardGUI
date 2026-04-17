@@ -1,6 +1,9 @@
 <div align="center"> <h1>Vehicle Dashboard GUI with Embedded Cruise Control</h1> </div>
-
+<h3>Preliminary design preview</h3>
 <p align="center">  <img src="resources/Pidisp.png" alt="Dashboard Sketch"> </p>
+<h3>Final application preview</h3>
+<p align="center">  <img src="resources/dashboard1.png" alt="Dashboard completed"> </p>
+<p align="center">  <img src="resources/dashboard2.png" alt="Dashboard completed"> </p>
 
 ## There are two main approaches to building a Qt project for the Raspberry Pi, and the recommended method for most users is Native Compilation.
 
