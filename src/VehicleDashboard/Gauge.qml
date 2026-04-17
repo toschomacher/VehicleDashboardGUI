@@ -851,4 +851,78 @@ Item {
             y: 100
         }
     }
+
+    // =========================
+    // Coolant Temperature and Air to Fuel Ratio readings
+    // =========================
+    Item {
+        id: coolanTempBar
+        width: 300
+        height: 800 // Increased to prevent bottom content from being cut off
+        x: 860
+        y: 10
+
+        property real coolantTemp: CAN && CAN.connected ? CAN.coolant : 0
+        property real airFuelRatio: CAN && CAN.connected ? CAN.afr : 0
+
+        Column {
+            anchors.centerIn: parent
+            spacing: 5 // Base spacing for the column
+
+            // Block 1: Coolant Number
+            Text {
+                text: coolanTempBar.coolantTemp + "°C"
+                color: "white"
+                font.pixelSize: 130
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
+            // --- TEMPERATURE IMAGE LOGIC ---
+            Image {
+                id: tempIcon
+                width: 200
+                height: 200
+                fillMode: Image.PreserveAspectFit
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                // Logic for switching temperature icons
+                source: coolanTempBar.coolantTemp < 50 ? "images/tempblue.png" :
+                        coolanTempBar.coolantTemp < 95 ? "images/temporange.png" : "images/tempred.png"
+
+                onStatusChanged: if (status === Image.Error) console.log("Can't find image at: " + source)
+            }
+
+            // --- ADDITIONAL SPACE (SPACER) ---
+            Item {
+                width: 1
+                height: 100 // Adjust this value to increase/decrease the gap
+            }
+
+            // Block 2: AFR Section
+            Column {
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: 5
+
+                Text {
+                    text: coolanTempBar.airFuelRatio.toFixed(1)
+                    color: "white"
+                    font.pixelSize: 130
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    lineHeight: 0.9
+                    lineHeightMode: Text.ProportionalHeight
+                }
+
+                Image {
+                    id: afrIcon
+                    width: 150
+                    height: 125
+                    source: "images/afr.png"
+                    fillMode: Image.PreserveAspectFit
+                    anchors.horizontalCenter: parent.horizontalCenter
+
+                    onStatusChanged: if (status === Image.Error) console.log("Can't find AFR image at: " + source)
+                }
+            }
+        }
+    }
 }

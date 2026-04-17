@@ -24,6 +24,13 @@ qt_add_qml_module(appVehicleDashboardGUI
         Gauge.qml
     RESOURCES
         images/background.png
+        images/background.png
+        images/ccon.png
+        images/ccoff.png
+        images/tempblue.png
+        images/temporange.png
+        images/tempred.png
+        images/afr.png
 )
 
 target_link_libraries(appVehicleDashboardGUI
