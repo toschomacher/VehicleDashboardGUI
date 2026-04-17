@@ -90,3 +90,40 @@ void HardwareController::update(bool ccActive, float throttle)
         setDACVoltage(1, v2);
     }
 }
+
+// ==========================
+// ADC READ
+// ==========================
+float HardwareController::readADC(int channel)
+{
+    if (ioctl(i2c_fd, I2C_SLAVE, ADS1115_ADDR) < 0) {
+        qDebug() << "Failed to select ADS1115";
+        return 0;
+    }
+
+    uint16_t config = 0x8000; // start conversion
+
+    switch (channel) {
+        case 0: config |= 0x4000; break;
+        case 1: config |= 0x5000; break;
+        default: return 0;
+    }
+
+    config |= 0x0083; // 128 SPS
+
+    uint8_t buffer[3];
+    buffer[0] = 0x01;
+    buffer[1] = (config >> 8) & 0xFF;
+    buffer[2] = config & 0xFF;
+
+    write(i2c_fd, buffer, 3);
+    usleep(10000);
+
+    buffer[0] = 0x00;
+    write(i2c_fd, buffer, 1);
+    read(i2c_fd, buffer, 2);
+
+    int16_t raw = (buffer[0] << 8) | buffer[1];
+
+    return raw * 4.096 / 32768.0;
+}
