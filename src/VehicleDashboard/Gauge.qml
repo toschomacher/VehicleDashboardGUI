@@ -14,8 +14,11 @@ Item {
     property real sweep: 270
     property real maxSpeed: 100
 
+    // This offset shifts the needle so it aligns with the ticks.
+    property real angleOffset: -45
+
     function speedToAngle(v) {
-        return startAngle + (v / maxSpeed) * sweep
+        return startAngle + (v / maxSpeed) * sweep + angleOffset
     }
 
     Item {
@@ -272,8 +275,8 @@ Item {
 
             width: major ? root.width * 0.006 : root.width * 0.0015
             height: major ? root.width * 0.03 : root.width * 0.025
-        radius: width / 2
-        color: "#55000000"
+            radius: width / 2
+            color: "#55000000"
 
             x: root.width / 2 + Math.cos(angle * Math.PI / 180) * root.width * 0.48 - width / 2
             y: root.height / 2 + Math.sin(angle * Math.PI / 180) * root.height * 0.48 - height / 2
@@ -315,7 +318,8 @@ Item {
         }
     }
 
-    // NEEDLE
+    // --- NEEDLE (FIXED POSITIONING) ---
+    // Instead of anchoring to root center, we now align to the actual gauge center
     Rectangle {
         id: needle
 
@@ -324,8 +328,9 @@ Item {
         radius: width / 2
         color: "#ff3b3b"
 
-        x: root.width / 2 - width / 2
-        y: root.height / 2 - height
+        // using real gauge center (important for cut gauges)
+        x: rings.outerCx - width / 2
+        y: rings.outerCy - height
 
         transform: Rotation {
             origin.x: width / 2
@@ -341,8 +346,8 @@ Item {
         radius: width / 2
         color: "#80ffffff"
 
-        x: root.width / 2 - width / 2
-        y: root.height / 2 - height
+        x: rings.outerCx - width / 2
+        y: rings.outerCy - height
 
         transform: Rotation {
             origin.x: width / 2
