@@ -27,5 +27,50 @@ Window {
         speed: 0
         rpm: 0
     }
+
+    // Button 1 Cruise
+    Rectangle {
+        id: cruiseButton
+        x: 82; y: 862
+        width: 226; height: 180
+        color: "#33FFFFFF"
+        border.color: "white"
+        border.width: 2
+        radius: 5
+
+        SequentialAnimation {
+            id: flashAnim
+            PropertyAnimation {
+                target: cruiseButton
+                property: "color"
+                to: "#80FFFFFF"
+                duration: 50
+            }
+            PropertyAnimation {
+                target: cruiseButton
+                property: "color"
+                to: "#33FFFFFF"
+                duration: 150
+            }
+        }
+
+        Text {
+            text: "CRUISE\nON"
+            anchors.centerIn: parent
+            color: "white"
+            font.pixelSize: 45
+            font.bold: true
+            horizontalAlignment: Text.AlignHCenter
+            lineHeight: 1.2
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                flashAnim.start()
+                CC.active = true
+            }
+        }
+    }
 }
 }
