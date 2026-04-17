@@ -68,4 +68,117 @@ void taskButtons(void *pv) {
   }
 }
 
+// ----------------------
+// CAN TASK
+// ----------------------
+void taskCAN(void *pv) {
+
+  unsigned long last = 0;
+  unsigned long lastThrottle = 0;
+
+  while (true) {
+
+    unsigned long now = millis();
+
+    // ---------------- SPEED (pot)
+    int rawSpeed = analogRead(POT_SPEED);
+    float speedMPH = (rawSpeed / 4095.0) * 100.0;
+
+    // ---------------- THROTTLE
+    int rawThrottle = analogRead(POT_THROTTLE);
+    float throttle = (rawThrottle / 4095.0) * 100.0;
+
+        // ---------------- RPM (pot)
+    int rawRPM = analogRead(POT_RPM);
+    float rpm = (rawRPM / 4095.0) * 8000.0;
+    // smoothing (low-pass filter)
+    static float smoothedRPM = 0;
+    smoothedRPM += (rpm - smoothedRPM) * 0.2; // adjustment options: 0.1 → smoother but slower ; 0.3 → faster but less smooth
+    rpm = smoothedRPM;
+
+    // optional deadzone
+    if (rpm < 50) rpm = 0;
+
+    // ---- SEND THROTTLE OVER CAN ----
+    if (now - lastThrottle >= 50) {
+        lastThrottle = now;
+
+        uint16_t raw = throttle * 100;
+
+        uint8_t data[8] = {
+            (uint8_t)(raw >> 8),
+            (uint8_t)(raw & 0xFF),
+            0,0,0,0,0,0
+        };
+
+        sendCAN(0x106, data);
+    }
+
+    // ---------------- AFR oscillation
+    if (now - last > 300) {
+      last = now;
+
+      if (afrUp) {
+        afr += 0.1;
+        if (afr >= 14.6) afrUp = false;
+      } else {
+        afr -= 0.1;
+        if (afr <= 13.4) afrUp = true;
+      }
+    }
+
+    // ---------------- SEND CAN
+
+    // SPEED
+    uint16_t speedRaw = speedMPH * 100;
+    uint8_t speedData[8] = {
+      (uint8_t)(speedRaw >> 8),
+      (uint8_t)(speedRaw),
+      0,0,0,0,0,0
+    };
+    sendCAN(0x101, speedData);
+
+    // PEDALS
+    uint8_t pedal = 0;
+    if (brake)  pedal |= 0x01;
+    if (clutch) pedal |= 0x02;
+
+    uint8_t pedalData[8] = { pedal,0,0,0,0,0,0,0 };
+    sendCAN(0x102, pedalData);
+
+    // COOLANT
+    uint8_t coolantData[8] = { (uint8_t)(coolantC + 40),0,0,0,0,0,0,0 };
+    sendCAN(0x103, coolantData);
+
+    // AFR
+    uint16_t afrRaw = afr * 100;
+    uint8_t afrData[8] = {
+      (uint8_t)(afrRaw >> 8),
+      (uint8_t)(afrRaw),
+      0,0,0,0,0,0
+    };
+    sendCAN(0x104, afrData);
+
+    // VOLTAGE
+    uint16_t voltRaw = voltage * 100;
+    uint8_t voltData[8] = {
+      (uint8_t)(voltRaw >> 8),
+      (uint8_t)(voltRaw),
+      0,0,0,0,0,0
+    };
+    sendCAN(0x105, voltData);
+
+    // RPM
+    uint16_t rpmRaw = rpm * 4;
+    uint8_t rpmData[8] = {
+      (uint8_t)(rpmRaw >> 8),
+      (uint8_t)(rpmRaw),
+      0,0,0,0,0,0
+    };
+    sendCAN(0x100, rpmData);
+
+    vTaskDelay(pdMS_TO_TICKS(10));
+  }
+}
+
 void loop() {}
