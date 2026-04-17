@@ -127,3 +127,32 @@ float HardwareController::readADC(int channel)
 
     return raw * 4.096 / 32768.0;
 }
+
+// ==========================
+// DAC WRITE (FIXED)
+// ==========================
+void HardwareController::setDACVoltage(int channel, float voltage)
+{
+    if (ioctl(i2c_fd, I2C_SLAVE, MCP4728_ADDR) < 0) {
+        qDebug() << "Failed to select MCP4728";
+        return;
+    }
+
+    if (voltage < 0) voltage = 0;
+    if (voltage > 5.0) voltage = 5.0;
+
+    uint16_t code = (voltage / 5.0f) * 4095.0f;
+
+    uint8_t buf[3];
+
+    // Command: write to channel
+    buf[0] = 0x40 | (channel << 1);
+
+    // Correct MCP4728 format
+    buf[1] = (code >> 8) & 0x0F;
+    buf[2] = code & 0xFF;
+
+    if (write(i2c_fd, buf, 3) != 3) {
+        qDebug() << "DAC write failed";
+    }
+}
