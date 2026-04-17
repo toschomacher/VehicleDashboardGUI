@@ -355,4 +355,54 @@ Item {
             angle: root.speedToAngle(root.speed)
         }
     }
+
+    // RPM LED ARC
+    // This creates the glowing segmented arc around the outer ring.
+    // Each segment lights up depending on the current RPM value.
+    // We use opacity instead of visible so inactive segments are still faintly visible.
+    // That makes the graph easier to debug and gives a better dashboard look.
+    Repeater {
+        model: 60   // number of LED segments
+
+        delegate: Rectangle {
+            width: root.width * 0.01
+            height: root.width * 0.035
+            radius: width / 2
+
+            // Convert index to normalized position (0 → 1)
+            property real t: index / (model - 1)
+
+            // Map RPM (0–6000 assumed) into same normalized range
+            property real rpmNorm: Math.min(root.rpm / 6000.0, 1.0)
+
+            // Instead of hiding inactive segments completely, make them dim
+            opacity: t <= rpmNorm ? 1.0 : 0.15
+
+            // Color zones for the RPM bar graph
+            color: {
+                if (t < 0.7) return "#00e0ff"   // blue / teal normal range
+                if (t < 0.9) return "#ffb000"   // orange warning range
+                return "#ff3030"                // red high RPM range
+            }
+
+            // Position along the same arc as the outer scale
+            property real angle: root.startAngle + t * root.sweep
+
+            x: root.width / 2 + Math.cos(angle * Math.PI / 180) * root.width * 0.50 - width / 2
+            y: root.height / 2 + Math.sin(angle * Math.PI / 180) * root.height * 0.50 - height / 2
+
+            rotation: angle + 90
+        }
+    }
+
+    // Temporary animation timer for testing the RPM LED arc
+    Timer {
+        interval: 30
+        running: true
+        repeat: true
+
+        onTriggered: {
+            root.rpm = (root.rpm + 100) % 6000
+        }
+    }
 }
