@@ -25,6 +25,56 @@ Item {
     property real startAngle: 135
     property real sweep: 270
     property real velocity: 0
+    property bool wasReady: true
+
+    Connections {
+        target: CC
+        function onSetSpeedChanged() {
+            root.ccSetValue = CC.setSpeed
+        }
+    }
+    Connections {
+        target: CC
+        function onActiveChanged() {
+            root.ccActivated = CC.active
+        }
+    }
+
+    Timer {
+        interval: 16
+        running: true
+        repeat: true
+
+        onTriggered: {
+            var stiffness = 0.20
+            var damping   = 0.50
+            // convert bool ? numeric (0 or 1)
+            var brakeRaw = (CAN && CAN.brake) ? 1 : 0
+            var clutchRaw = (CAN && CAN.clutch) ? 1 : 0
+            var force = (smoothedSpeed  - displaySpeed) * stiffness
+
+            velocity += force
+            velocity *= damping
+
+            displaySpeed += velocity
+                                                                        // 0.6 smoothedThrottle += (CAN.throttle - smoothedThrottle) * 0.3
+            displayRPM += (rpm - displayRPM) * 0.15                     // 0.15 medium
+            smoothedRPM += (rpm - smoothedRPM) * 0.05                   // 0.05 very slow
+            smoothedSpeed += (CAN.speed - smoothedSpeed) * 0.15
+            smoothedBrake  += (brakeRaw  - smoothedBrake)  * 0.3
+            smoothedClutch += (clutchRaw - smoothedClutch) * 0.3
+
+            //smoothedThrottle += (CAN.throttle - smoothedThrottle) * 0.15 // 0.3 fast but smooth
+            // Smooth throttle by spike rejection (outlier filtering)
+            rawThrottle = CAN ? CAN.throttle : 0
+            var diff = Math.abs(rawThrottle - prevThrottle)
+            if (diff < 10) {
+                smoothedThrottle += (rawThrottle - smoothedThrottle) * 0.2
+            }
+            prevThrottle = rawThrottle
+
+        }
+    }
 
     // =========================
     // RINGS / SHAPE GEOMETRY
