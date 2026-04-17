@@ -299,4 +299,20 @@ Item {
         }
     }
 
+    // RPM LABELS
+    Repeater {
+        model: 7
+
+        delegate: Text {
+            text: index
+            color: "#aaaaaa"
+            font.pixelSize: Math.round(root.width * 0.045)
+
+            property real angle: root.startAngle + (index / 6) * root.sweep
+
+            x: root.width / 2 + Math.cos(angle * Math.PI / 180) * root.width * 0.26 - width / 2
+            y: root.height / 2 + Math.sin(angle * Math.PI / 180) * root.height * 0.26 - height / 2
+        }
+    }
+
 }
