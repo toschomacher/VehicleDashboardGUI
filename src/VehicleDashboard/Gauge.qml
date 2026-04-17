@@ -64,6 +64,39 @@ Item {
     Item {
         anchors.fill: parent
 
+        // Background gradient
+        Rectangle {
+            anchors.fill: parent
+            radius: width / 2
+
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: "#3a3a3a" }
+                GradientStop { position: 0.3; color: "#2b2b2b" }
+                GradientStop { position: 0.7; color: "#1f1f1f" }
+                GradientStop { position: 1.0; color: "#0f0f0f" }
+            }
+        }
+
+        // Texture
+        Canvas {
+            anchors.fill: parent
+            opacity: 0.15
+
+            onPaint: {
+                var ctx = getContext("2d");
+                ctx.clearRect(0, 0, width, height);
+
+                for (var i = 0; i < 2000; i++) {
+                    var x = Math.random() * width;
+                    var y = Math.random() * height;
+                    var alpha = Math.random() * 0.05;
+                    ctx.fillStyle = "rgba(255,255,255," + alpha + ")";
+                    ctx.fillRect(x, y, 1, 1);
+                }
+            }
+        }
+
+        // Outer ring
         Shape {
             anchors.fill: parent
             antialiasing: true
@@ -71,7 +104,7 @@ Item {
             ShapePath {
                 strokeWidth: 3
                 strokeColor: "white"
-                fillColor: "#111111"
+                fillColor: "transparent"
 
                 startX: rings.outerLeftX
                 startY: rings.outerCutY
@@ -92,6 +125,7 @@ Item {
             }
         }
 
+        // Middle ring
         Shape {
             anchors.fill: parent
             opacity: 0.8
@@ -121,6 +155,7 @@ Item {
             }
         }
 
+        // Inner ring
         Shape {
             anchors.fill: parent
             opacity: 0.8
