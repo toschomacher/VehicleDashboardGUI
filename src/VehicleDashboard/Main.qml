@@ -119,5 +119,52 @@ Window {
                 }
             }
         }
+
+        // Button 3 decrement speed -
+        Rectangle {
+            id: speedDownButton
+            x: 604
+            y: 862
+            width: 226
+            height: 180
+            color: "#33FFFFFF"
+            border.color: "white"
+            border.width: 2
+            radius: 5
+
+            SequentialAnimation {
+                id: flashAnimDown
+                PropertyAnimation {
+                    target: speedDownButton
+                    property: "color"
+                    to: "#80FFFFFF"
+                    duration: 50
+                }
+                PropertyAnimation {
+                    target: speedDownButton
+                    property: "color"
+                    to: "#33FFFFFF"
+                    duration: 150
+                }
+            }
+
+            Text {
+                text: "SPEED\n-"
+                anchors.centerIn: parent
+                color: "white"
+                font.pixelSize: 45
+                font.bold: true
+                horizontalAlignment: Text.AlignHCenter
+                lineHeight: 1.2
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    flashAnimDown.start()
+                    CC.setSpeed = Math.max(0, CC.setSpeed - 1)
+                }
+            }
+        }
     }
 }
