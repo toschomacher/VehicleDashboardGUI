@@ -631,76 +631,144 @@ Item {
     // THROTTLE BAR
     // =========================
     Item {
-            id: throttleBar
+        id: throttleBar
 
-            width: 110
-            height: 982
+        width: 110
+        height: 982
 
-            x: 1496
-            y: 5
+        x: 1496
+        y: 5
 
-            //property real value: CAN.throttle / 100           // no low-pass filter, direct responce
-            //property real value: root.smoothedThrottle / 100    // with fast+smooth low-pass filter
-            property real finalThrottle:
-                root.ccActivated
-                    ? (CC ? CC.outputThrottle : 0)
-                    : (CAN ? CAN.throttle : 0)
+        property real finalThrottle:
+            root.ccActivated
+                ? (CC ? CC.outputThrottle : 0)
+                : (CAN ? CAN.throttle : 0)
 
-            property real value: finalThrottle / 100
+        property real value: finalThrottle / 100
 
-            Rectangle {
-                anchors.fill: parent
-                color: "transparent"
-                border.color: "#00ff66"
-                border.width: 4
-                radius: 4
-            }
-
-            Rectangle {
-                anchors.fill: parent
-                anchors.margins: 6
-                color: "#020611"
-                radius: 3
-            }
-
-            Rectangle {
-                id: fill
-
-                width: parent.width - 12
-                x: 6
-                height: (parent.height - 12) * throttleBar.value
-                y: parent.height - height - 6
-                radius: 2
-
-                gradient: Gradient {
-                    GradientStop { position: 0.0; color: "#1db954" }
-                    GradientStop { position: 1.0; color: "#3cff7a" }
-                }
-
-                opacity: 0.95
-            }
-
-            Rectangle {
-                anchors.fill: parent
-                anchors.margins: 6
-
-                color: "transparent"
-                border.color: "#000000"
-                border.width: 2
-                radius: 3
-                opacity: 0.5
-            }
-
-            Text {
-                text: Math.round(throttleBar.value * 100) + "%"
-                color: "#3cff7a"
-
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: -60
-
-                font.pixelSize: 40
-                y: 100
-            }
+        Rectangle {
+            anchors.fill: parent
+            color: "transparent"
+            border.color: "#00ff66"
+            border.width: 4
+            radius: 4
         }
+
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: 6
+            color: "#020611"
+            radius: 3
+        }
+
+        Rectangle {
+            id: fill
+
+            width: parent.width - 12
+            x: 6
+            height: (parent.height - 12) * throttleBar.value
+            y: parent.height - height - 6
+            radius: 2
+
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: "#1db954" }
+                GradientStop { position: 1.0; color: "#3cff7a" }
+            }
+
+            opacity: 0.95
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: 6
+
+            color: "transparent"
+            border.color: "#000000"
+            border.width: 2
+            radius: 3
+            opacity: 0.5
+        }
+
+        Text {
+            text: Math.round(throttleBar.value * 100) + "%"
+            color: "#3cff7a"
+
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: -60
+
+            font.pixelSize: 40
+            y: 100
+        }
+    }
+
+    // =========================
+    // BRAKE BAR
+    // =========================
+    Item {
+        id: brakeBar
+
+        width: 110
+        height: 982
+
+        x: 1346
+        y: 5
+
+        property real value: root.smoothedBrake > 0.5 ? 1 : 0
+
+        Rectangle {
+            anchors.fill: parent
+            color: "transparent"
+            border.color: "#ff2d00"
+            border.width: 4
+            radius: 4
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: 6
+            color: "#020611"
+            radius: 3
+        }
+
+        Rectangle {
+            id: fillB
+
+            width: parent.width - 12
+            x: 6
+            height: (parent.height - 12) * brakeBar.value
+            y: parent.height - height - 6
+            radius: 2
+
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: "#e62900" }
+                GradientStop { position: 1.0; color: "#ff2d00" }
+            }
+
+            opacity: 0.95
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: 6
+
+            color: "transparent"
+            border.color: "#000000"
+            border.width: 2
+            radius: 3
+            opacity: 0.5
+        }
+
+        Text {
+            text: brakeBar.value > 0 ? "BRAKE" : " "
+            color: "#ff2d00"
+
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: -60
+
+            font.pixelSize: 40
+            y: 100
+        }
+    }
 }
