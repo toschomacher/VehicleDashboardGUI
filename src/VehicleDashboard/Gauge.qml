@@ -536,4 +536,94 @@ Item {
             }
         }
     }
+
+    // =========================
+    // DIGITAL SPEED (CENTERED, NO RECTANGLE)
+    // =========================
+    Item {
+        id: digitalSpeed
+        width: root.width * 0.34
+        height: root.width * 0.22
+
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenterOffset: root.height * -0.07
+
+        Text {
+            id: speedText
+
+            text: Math.round(root.displaySpeed)
+            color: "white"
+
+            font.pixelSize: root.width * 0.23
+            font.bold: false
+
+            lineHeight: 1.0
+            lineHeightMode: Text.FixedHeight
+
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: 30
+        }
+
+        Text {
+            id: unitText
+
+            text: "MPH"
+            color: "#ff9c00"
+
+            font.pixelSize: root.width * 0.10
+            font.bold: false
+
+            lineHeight: 1.0
+            lineHeightMode: Text.FixedHeight
+
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: speedText.y + speedText.height * 0.88
+        }
+
+        Text {
+            id: rpmText
+
+            text: Math.round(root.displayRPM)
+            color: "#00d2ff"
+
+            font.pixelSize: root.width * 0.075
+            font.bold: false
+
+            lineHeight: 1.0
+            lineHeightMode: Text.FixedHeight
+
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: speedText.y + speedText.height * 1.31
+        }
+
+        Text {
+            id: odometerText
+
+            text: "<span style='color:#ff9c00; font-size:" + Math.round(root.width * 0.043) + "px;'>ODO </span>" +
+                  "<span style='color:#ffffff; font-size:" + Math.round(root.width * 0.070) + "px;'>" + Math.round(root.displayODO) + "</span>" +
+                  "<span style='color:#ff9c00; font-size:" + Math.round(root.width * 0.035) + "px;'> miles </span>"
+
+            textFormat: Text.RichText
+
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: Math.round(speedText.y + speedText.height * 1.75)
+        }
+
+        Text {
+            id: readyText
+
+            text: root.smoothedRPM < 50 ? "READY" : ""
+            color: "#00ff66"
+
+            font.pixelSize: Math.round(root.width * 0.055)
+            font.bold: false
+
+            lineHeight: 1.0
+            lineHeightMode: Text.FixedHeight
+
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: -15
+        }
+    }
 }
