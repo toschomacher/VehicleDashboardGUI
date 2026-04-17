@@ -8,6 +8,16 @@ Item {
     property real rpm: 0
     property real displaySpeed: 0
     property real displayRPM: 0
+    property real displayODO: 16625
+    property real ccSetValue: 0
+    property bool ccActivated: false
+    property real smoothedRPM: 0
+    property real smoothedThrottle: 0
+    property real smoothedSpeed: 0
+    property real smoothedBrake: 0
+    property real smoothedClutch: 0
+    property real prevThrottle: 0
+    property real rawThrottle: 0
 
     width: 700
     height: 700
@@ -762,6 +772,76 @@ Item {
         Text {
             text: brakeBar.value > 0 ? "BRAKE" : " "
             color: "#ff2d00"
+
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: -60
+
+            font.pixelSize: 40
+            y: 100
+        }
+    }
+
+    // =========================
+    // CLUTCH BAR
+    // =========================
+    Item {
+        id: clutchBar
+
+        width: 110
+        height: 982
+
+        x: 1196
+        y: 5
+
+        property real value: root.smoothedClutch > 0.5 ? 1 : 0
+
+        Rectangle {
+            anchors.fill: parent
+            color: "transparent"
+            border.color: "#fff134"
+            border.width: 4
+            radius: 4
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: 6
+            color: "#020611"
+            radius: 3
+        }
+
+        Rectangle {
+            id: fillC
+
+            width: parent.width - 12
+            x: 6
+            height: (parent.height - 12) * clutchBar.value
+            y: parent.height - height - 6
+            radius: 2
+
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: "#ffed01" }
+                GradientStop { position: 1.0; color: "#fff134" }
+            }
+
+            opacity: 0.95
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: 6
+
+            color: "transparent"
+            border.color: "#000000"
+            border.width: 2
+            radius: 3
+            opacity: 0.5
+        }
+
+        Text {
+            text: clutchBar.value > 0 ? "CLUTCH" : " "
+            color: "#fff134"
 
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom
