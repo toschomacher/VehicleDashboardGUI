@@ -156,3 +156,23 @@ void HardwareController::setDACVoltage(int channel, float voltage)
         qDebug() << "DAC write failed";
     }
 }
+
+// ==========================
+// GPIO
+// ==========================
+void HardwareController::setupGPIO()
+{
+    chip = gpiod_chip_open_by_name("gpiochip0");
+
+    line17 = gpiod_chip_get_line(chip, 17);
+    line21 = gpiod_chip_get_line(chip, 21);
+
+    gpiod_line_request_output(line17, "cc", 0);
+    gpiod_line_request_output(line21, "cc", 0);
+}
+
+void HardwareController::setSwitches(bool enabled)
+{
+    gpiod_line_set_value(line17, enabled ? 1 : 0);
+    gpiod_line_set_value(line21, enabled ? 1 : 0);
+}
