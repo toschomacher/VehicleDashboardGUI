@@ -10,13 +10,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt6 REQUIRED COMPONENTS Quick SerialBus)
 find_library(GPIOD_LIB gpiod)
 
-qt_standard_project_setup(REQUIRES 6.4)
+qt_standard_project_setup(REQUIRES 6.4) # version reduced from 6.8 to 6.4
 
 qt_add_executable(appVehicleDashboardGUI
     main.cpp
     SwitchHandler.h
     CanBusManager.h
     CanBusManager.cpp
+    CruiseController.h
+    CruiseController.cpp
     HardwareController.h
     HardwareController.cpp
 )
@@ -24,7 +26,7 @@ qt_add_executable(appVehicleDashboardGUI
 qt_add_qml_module(appVehicleDashboardGUI
     URI VehicleDashboardGUI
     VERSION 1.0
-    RESOURCE_PREFIX "/"
+    RESOURCE_PREFIX "/"    # <--- ADDING THIS HELPS WITH THE QRC PATHS
     QML_FILES
         Main.qml
         Gauge.qml
