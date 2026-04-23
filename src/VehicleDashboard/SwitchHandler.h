@@ -75,7 +75,7 @@ private slots:
         if (highDurationMs >= 1000 && !triggered) {
             triggered = true;
             qDebug() << "GPIO26 HIGH for 1 second, requesting shutdown";
-            emit shutdownRequested();
+            emit shutdonwnRequested();
         }
     }
 

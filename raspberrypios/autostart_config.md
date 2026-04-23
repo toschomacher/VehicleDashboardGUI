@@ -1,3 +1,9 @@
+# Raspberry Pi dependencies script
+```bash
+chmod +x setup_dashboard.sh
+./setup_dashboard.sh
+```
+
 # Raspberry Pi Auto-Start Configuration for Qt6 Vehicle Dashboard
 
 ## Overview
